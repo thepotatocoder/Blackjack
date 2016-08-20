@@ -135,20 +135,28 @@ class DeckBox():
         '''
         Initiates the round over procedure.
         '''
+        global game_round
         global game_points
         global points
         global hand
 
+        busted = False
+
         print("Round over! - Cause: ", end="")
         if points > 21:
             print("Too many points!")
+            busted = True
         elif points == 21:
             print("BLACKJACK! PogChamp")
         else:
             print("Passed turn!")
 
+        game_round += 1
+
         print("Points lost: ", end="")
-        points_lose = points - 21
+        points_lose = abs(points - 21)
+        if busted:
+            points_lose = 21
         game_points -= points_lose
         print(points_lose)
         print("Total points: ",end="")
@@ -166,7 +174,10 @@ class DeckBox():
         self.roundover()
 
     def startdeal(self):
-        print("New round! Dealing two cards...")
+        global game_round
+        print("Round ",end="")
+        print(game_round,end="! ")
+        print("Dealing two cards...")
         self.drawcard()
         self.drawcard()
 
@@ -181,11 +192,38 @@ def userinput(opt, box):
     elif opt == "q":
         leave = True
 
+def game_over():
+    global game_points
+    print("Game Over!")
+    print("You scored a total of ",end="")
+    print(game_points,end=" points! ")
+    print("You achieved the rank of ",end="")
+
+    if game_points > 89:
+        rank = "A"
+    elif game_points > 79:
+        rank = "B"
+    elif game_points > 69:
+        rank = "C"
+    elif game_points > 59:
+        rank = "D"
+    elif game_points > 49:
+        rank = "F"
+    elif game_points <= 49:
+        rank = "being absolutely terrible"
+
+    print(rank)
+
+
 box1 = DeckBox()
 box1.shuffledeck()
 box1.startdeal()
 
 while leave == False:
+                #Check stuff
+    if game_round == 6:
+        game_over()
+        break
                 #Get input from user
     print("----------------------------------------------")
     print("Select move: d - Draw | p - pass |  q - quit")
@@ -193,5 +231,3 @@ while leave == False:
     opt = input(">>")
     print("----------------------------------------------")
     userinput(opt, box1)
-
-                #Check stuff
