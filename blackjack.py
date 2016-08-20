@@ -1,5 +1,4 @@
 #python3
-
 '''
     A Blackjack simulation
 
@@ -70,8 +69,11 @@ pydeck = {
     "2 of Diamonds" : 2,
 }
 
+game_points = 100
+game_round = 1
 deck = []
 hand = []
+points= 0;
 leave = 0;
 
 class DeckBox():
@@ -98,27 +100,134 @@ class DeckBox():
     def drawcard(self):
         global hand
         global deck
+        global points
 
         hand.append(deck[0])
         del deck[0]
+        card = hand[-1][0]
+        value = hand[-1][1]
+        points += int(value)
+
+        print("You drew the ", end="")
+        print(card, end="")
+        print("! That's ", end="")
+        print(value, end=" ")
+        print("point", end="")
+        if value > 1:
+            print("s", end=" ")
+        else:
+            print(" ")
+        print("more, making a total of ", end="")
+        print(points, end=" ")
+        print("point", end="")
+        if points > 1:
+            print("s", end="")
+        print("!")
+
+        if points >= 21:
+            self.roundover()
 
     def printhand(self):
         global hand
-
         print(hand)
+
+    def roundover(self):
+        '''
+        Initiates the round over procedure.
+        '''
+        global game_round
+        global game_points
+        global points
+        global hand
+
+        busted = False
+
+        print("Round over! - Cause: ", end="")
+        if points > 21:
+            print("Too many points!")
+            busted = True
+        elif points == 21:
+            print("BLACKJACK! PogChamp")
+        else:
+            print("Passed turn!")
+
+        game_round += 1
+
+        print("Points lost: ", end="")
+        points_lose = abs(points - 21)
+        if busted:
+            points_lose = 21
+        game_points -= points_lose
+        print(points_lose)
+        print("Total points: ",end="")
+        print(game_points)
+
+                #New round
+        hand = []
+        points = 0
+
+        dummy = input("Insert any string to continue to next round!")
+        print("--------------------------------------------")
+        self.startdeal()
+
+    def passturn(self):
+        self.roundover()
+
+    def startdeal(self):
+        global game_round
+        print("Round ",end="")
+        print(game_round,end="! ")
+        print("Dealing two cards...")
+        self.drawcard()
+        self.drawcard()
+
+
+
+def userinput(opt, box):
+    global leave
+    if opt == "d":
+        box.drawcard()
+    elif opt == "p":
+        box.passturn()
+    elif opt == "q":
+        leave = True
+
+def game_over():
+    global game_points
+    print("Game Over!")
+    print("You scored a total of ",end="")
+    print(game_points,end=" points! ")
+    print("You achieved the rank of ",end="")
+
+    if game_points > 89:
+        rank = "A"
+    elif game_points > 79:
+        rank = "B"
+    elif game_points > 69:
+        rank = "C"
+    elif game_points > 59:
+        rank = "D"
+    elif game_points > 49:
+        rank = "F"
+    elif game_points <= 49:
+        rank = "being absolutely terrible"
+
+    print(rank)
+
 
 box1 = DeckBox()
 box1.shuffledeck()
-while leave == 0:
-    print("-------------------------------------------------")
-    print("Select move: d - Draw | p - printhand |  q - quit")
+box1.startdeal()
+
+while leave == False:
+                #Check stuff
+    if game_round == 6:
+        game_over()
+        break
+                #Get input from user
+    print("----------------------------------------------")
+    print("Select move: d - Draw | p - pass |  q - quit")
     print(" ")
     opt = input(">>")
-    print("-------------------------------------------------")
-
-    if opt == "d":
-        box1.drawcard()
-    elif opt == "p":
-        box1.printhand()
-    elif opt == "q":
-        leave = 1
+    print("----------------------------------------------")
+    userinput(opt, box1)
